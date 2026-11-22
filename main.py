@@ -1,52 +1,59 @@
-"""News image entry for Sunday 22 November 2026 (Python 3.13, stdlib only).
+#!/usr/bin/env python3
+"""Copy the entry image to the output path.
 
-The entry is the newspaper front page stored beside this file as entry.png:
-"THE WORLD" for Sunday 22 November 2026 — 35 stories from 7 regions, led by
-Iran's strikes on Bahrain and the two tankers hit near Hormuz, plus two
-"Also in brief" blocks. The page was drawn at build time by rendering an
-HTML page to PNG with a local browser; no AI image generator was involved.
-
-The program's only job is to copy that image to /output/entry.png, the
-single file the grader and the judge read. It needs no network and no tools
-at run time, so every run writes exactly the same bytes. After copying it
-checks the size and the PNG magic: the output must match the image beside
-this file byte for byte in length, so a short or partial copy fails loudly
-instead of reaching the judge.
-
-Outside the grader's container, MAKEFUN_OUTPUT_DIR stands in for /output:
-  mkdir -p out && MAKEFUN_OUTPUT_DIR=out python3 main.py
+The repository ships entry.png, a 1024x1024 newspaper front page
+summing up the world news of 22 November 2026. This program copies
+that file to /output/entry.png so the judge can read it. It uses only
+the Python standard library, performs no network access, and is fully
+deterministic: the same input always produces the same output bytes.
 """
 
+import hashlib
 import os
-import shutil
 import sys
 
+PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
+MAX_BYTES = 1_048_576
 
-def main() -> int:
-    here = os.path.dirname(os.path.abspath(__file__))
-    source = os.path.join(here, "entry.png")
+
+def fail(message):
+    print(f"error: {message}", file=sys.stderr)
+    return 1
+
+
+def main(argv):
+    source = os.path.join(os.path.dirname(os.path.abspath(__file__)), "entry.png")
+    dest = argv[1] if len(argv) > 1 else "/output/entry.png"
+
     if not os.path.isfile(source):
-        print(f"entry.png not found beside main.py: {source}", file=sys.stderr)
-        return 1
+        return fail(f"entry image not found: {source}")
 
-    out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR", "/output")
-    os.makedirs(out_dir, exist_ok=True)
-    out = os.path.join(out_dir, "entry.png")
-    shutil.copyfile(source, out)
+    with open(source, "rb") as handle:
+        data = handle.read()
 
-    expected = os.path.getsize(source)
-    written = os.path.getsize(out)
-    if written != expected:
-        print(f"short copy: wrote {written} of {expected} bytes", file=sys.stderr)
-        return 1
-    with open(out, "rb") as f:
-        magic = f.read(8)
-    if magic != b"\x89PNG\r\n\x1a\n":
-        print("output is not a PNG file", file=sys.stderr)
-        return 1
-    print(f"wrote {out} ({written} bytes)")
+    if not data.startswith(PNG_MAGIC):
+        return fail("entry image is not a PNG file")
+
+    if len(data) < 33 or data[12:16] != b"IHDR":
+        return fail("entry image has no PNG header chunk")
+
+    width = int.from_bytes(data[16:20], "big")
+    height = int.from_bytes(data[20:24], "big")
+    if (width, height) != (1024, 1024):
+        return fail(f"entry image is {width}x{height}, expected 1024x1024")
+
+    if len(data) > MAX_BYTES:
+        return fail(f"entry image is {len(data)} bytes, over the 1 MiB limit")
+
+    digest = hashlib.sha256(data).hexdigest()
+    print(f"entry.png: {len(data)} bytes, sha256 {digest}")
+
+    os.makedirs(os.path.dirname(dest) or ".", exist_ok=True)
+    with open(dest, "wb") as handle:
+        handle.write(data)
+
     return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    sys.exit(main(sys.argv))

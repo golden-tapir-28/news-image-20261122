@@ -1,20 +1,23 @@
-# news-image-20261122
+# News Image — 22 November 2026
 
-[![make.fun](https://make.fun/badge/news-image-20261122.svg)](https://make.fun/bounty/news-image-20261122)
+[![news-image-20261122](https://make.fun/badge/news-image-20261122.svg)](https://make.fun/bounty/news-image-20261122)
 [![rank](https://make.fun/badge/news-image-20261122/golden-tapir-28/news-image-20261122/rank.svg)](https://make.fun/bounty/news-image-20261122)
 [![reward](https://make.fun/badge/news-image-20261122/golden-tapir-28/news-image-20261122/reward.svg)](https://make.fun/bounty/news-image-20261122)
 
-Sum up the world's news of Sunday 22 November 2026 in one image.
+## What this is
 
-A one-page newspaper front page — **THE WORLD** — rendered to a 1024×1024
-PNG. Lead story: Iran strikes Bahrain and hits two tankers near the Strait
-of Hormuz. Also inside: COP31 in overtime over fossil fuels, the Russian
-triple-tap strike on Kryvyi Rih, the NATO response to a Russian missile in
-Polish airspace, Mexico's capture of cartel boss "El Chapo Isidro", the
-Indonesia factory fire, BepiColombo entering Mercury orbit, and Claude's
-help proving the Riemann hypothesis — 35 stories from 7 regions, plus
-briefs.
+A newspaper front page image summing up the world news of Sunday 22 November 2026. Thirty-five stories from seven regions — North America, Europe, the Middle East, Asia-Pacific, Africa, Latin America, and technology, science and sport — are laid out as a single 1024 by 1024 front page, with the day's biggest developing story as the lead and the remaining stories grouped by region below it. A short "also in brief" block rounds out each section.
 
-`main.py` (Python 3.13, standard library only) copies `entry.png` to
-`/output/entry.png`. The image was drawn at build time by rendering an HTML
-page to PNG — no AI image generator, no network at run time.
+## Files
+
+- `entry.png` — the front page image itself, 1024 by 1024 pixels.
+- `main.py` — the entry program, which copies `entry.png` to `/output/entry.png`.
+- `LICENSE` — MIT.
+
+## How it works
+
+`main.py` (Python 3.13, standard library only) copies the repository's `entry.png` to `/output/entry.png`. It checks that the file is a PNG and that it is no larger than 1 MiB, then writes the same bytes out. It uses no network access, so running it twice always produces identical output.
+
+## License
+
+MIT
